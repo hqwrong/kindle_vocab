@@ -18,19 +18,49 @@ function post(path, params, method) {
     form.submit();
 }
 
+
+function adddict(word, desc) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/wordbook/wordlist?action=add", true)
+    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    var params = "word=" + encodeURIComponent(word) + "&desc=" + encodeURIComponent(desc) + "&tags=kindle"
+
+    xhr.send(params)
+}
+
 function rundb(db) {
+    var prompt = document.createElement("span")
+    document.body.insertBefore(prompt, document.body.firstChild);
+    prompt.innerHTML = "PROCESSING..."
+
+    function _add(w) {
+        var key = w[0]
+        var ww = w[1]
+        var stem = w[2]
+
+        var lookups = db.exec("Select * From LOOKUPS Where word_key == '{}';".replace("{}", key))
+        var l = lookups[0].values
+        var desc = ""
+        for (var i in l) {
+            var entry = l[i]
+
+            var text = entry[5]
+            var bookinfo = db.exec("Select * From BOOK_INFO Where id == '{}'".replace("{}", entry[2]))
+            var booktitle = bookinfo[0].values[0][4]
+
+            desc += text + "\n -- \n" + booktitle + "\n\n"
+        }
+
+        adddict(ww, desc)
+    }
+
     var result = db.exec("Select * From Words Where id like 'en:%';");
     var words = result[0].values
-    console.log(words)
-    // for (var i in words) {
-    //     var w = words[i]
-    //     var key = w[0]
-    //     var ww = w[1]
-    //     var stem = w[2]
+    for (var i in words) {
+        _add(words[i])
+    }
 
-    //     var lookups = db.exec("Select * From LOOKUPS Where word_key == '?';", key)
-    //     console.log(lookups)
-    // }
+    prompt.innerHTML = "DONE WITH "+ words.length + " WORDS!"
 }
 
 function loaddb() {
