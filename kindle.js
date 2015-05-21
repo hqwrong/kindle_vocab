@@ -60,7 +60,7 @@ function rundb(db) {
         _add(words[i])
     }
 
-    prompt.innerHTML = "DONE WITH "+ words.length + " WORDS!"
+    prompt.innerHTML = "IMPORT "+ words.length + " WORDS!"
 }
 
 function loaddb() {
